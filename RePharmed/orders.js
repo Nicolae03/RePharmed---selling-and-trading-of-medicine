@@ -22,6 +22,123 @@ function labelCategory(cat) {
   })[cat] || "Outros";
 }
 
+function buildStoreLinkFromRequest(r, extra = {}) {
+  const params = new URLSearchParams();
+
+  const q = (r.substance && r.substance.trim()) ? r.substance.trim() : r.title;
+  if (q) params.set("q", q);
+
+  if (r.category && r.category !== "all") params.set("cat", r.category);
+
+  if (typeof r.maxPrice === "number") params.set("pmax", String(r.maxPrice));
+  if (typeof r.distanceKm === "number") params.set("dmax", String(r.distanceKm));
+
+  params.set("from", "request");
+  params.set("rid", r.id);
+
+  // extras opcionais (ex: abrir checkout num produto específico)
+  Object.entries(extra).forEach(([k, v]) => {
+    if (v !== undefined && v !== null) params.set(k, String(v));
+  });
+
+  return `index.html?${params.toString()}`;
+}
+
+function matchListingsForRequest(r) {
+  const listings = Array.isArray(PS.listings) ? PS.listings : [];
+  const q = normalize((r.substance && r.substance.trim()) ? r.substance : r.title);
+
+  return listings.filter((it) => {
+    // categoria
+    if (r.category && r.category !== "all" && it.category !== r.category) return false;
+
+    // distância (usar o r.distanceKm como limite “até X km”)
+    if (typeof r.distanceKm === "number" && it.distanceKm > r.distanceKm) return false;
+
+    // stock mínimo: tenta satisfazer quantidade pedida
+    if (typeof r.quantity === "number" && it.stock < r.quantity) return false;
+
+    // preço (usa preço de tabela; se quiseres usar "finalPrice" com desconto, ajustamos)
+    if (typeof r.maxPrice === "number" && it.price > r.maxPrice) return false;
+
+    // query match (título/substância/lab)
+    if (q) {
+      const hay = normalize(`${it.name} ${it.activeSubstance} ${it.lab} ${it.seller} ${it.city}`);
+      if (!hay.includes(q)) return false;
+    }
+
+    return true;
+  }).sort((a, b) => {
+    // ordenação: mais barato primeiro, depois mais perto
+    if (a.price !== b.price) return a.price - b.price;
+    return a.distanceKm - b.distanceKm;
+  });
+}
+
+function openMatchesModal(requestObj) {
+  const matches = matchListingsForRequest(requestObj);
+
+  // header
+  const header = `
+    <div><strong>${requestObj.title}</strong></div>
+    <div class="small">
+      ${requestObj.requester} • ${requestObj.city}
+      • Qtd: ${requestObj.quantity}
+      • Até ${formatEur(requestObj.maxPrice)}
+      • ${requestObj.distanceKm.toFixed(1)} km
+    </div>
+    <div class="hr"></div>
+    <div style="font-weight:900; margin-bottom:8px;">
+      ${matches.length ? `Encontrámos ${matches.length} oferta(s) compatível(eis)` : "Não encontrámos ofertas compatíveis"}
+    </div>
+  `;
+
+  // lista de matches, cada um com 2 botões
+  const list = matches.length
+    ? matches.slice(0, 6).map((it) => {
+        const buyLink = buildStoreLinkFromRequest(requestObj, { openCheckout: 1, lid: it.id });
+        const storeLink = buildStoreLinkFromRequest(requestObj); // só filtros
+
+        return `
+          <div class="kv" style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+              <div>
+                <div style="font-weight:900">${it.name}</div>
+                <div class="small">${it.seller} • ${it.city} • ${it.distanceKm.toFixed(1)} km • Stock: ${it.stock}</div>
+                <div class="small">${labelCategory(it.category)} • ${it.lab}</div>
+              </div>
+              <div style="text-align:right; white-space:nowrap;">
+                <div style="font-weight:900">${formatEur(it.price)}</div>
+                <div class="small">${it.discountPct}% desc.</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+              <a class="btn" href="${storeLink}">Ver na loja</a>
+              <a class="btn btn--primary" href="${buyLink}">Comprar</a>
+            </div>
+          </div>
+        `;
+      }).join("")
+    : `<div class="small">Experimenta aumentar distância ou preço máximo.</div>`;
+
+  const body = `
+    ${header}
+    ${list}
+    <div class="hr"></div>
+    <div class="small">Se quiseres, podes abrir a loja só com os filtros do pedido.</div>
+  `;
+
+  // ✅ Botão do fundo do modal (ok) passa a ser "Ver na loja"
+  openModal("Ofertas encontradas", body, "Ver na loja");
+
+  // ok -> vai para loja com filtros (sem checkout)
+  $("#modalOk").onclick = () => {
+    window.location.href = buildStoreLinkFromRequest(requestObj);
+  };
+}
+
+
 function openModal(title, bodyHtml, okText = "Confirmar") {
   const modalWrap = $("#modal");
   $("#modalTitle").textContent = title;
@@ -147,7 +264,7 @@ function seedRequests() {
       quantity: 40,
       maxPrice: 3.20,
       deadlineDays: 7,
-      distanceKm: 3.6,
+      distanceKm: 999,
       requester: "Farmácia Central",
       city: "Lisboa",
       urgent: true,
@@ -261,7 +378,7 @@ function openCreateRequest() {
       maxPrice: Number($("#fMax").value) || 0,
       deadlineDays: Number($("#fDeadline").value) || 7,
       urgent: $("#fUrgent").value === "true",
-      distanceKm: 3.0,
+      distanceKm: 999.0,
       requester: "Farmácia Central (Demo)",
       city: "Lisboa",
       notes: $("#fNotes").value.trim(),
@@ -270,9 +387,13 @@ function openCreateRequest() {
     });
 
     PS.saveRequests(reqs);
-    closeModal();
-    PS.showToast(`Pedido publicado: ${id}`);
-    applyFilters();
+  closeModal();
+  PS.showToast(`Pedido publicado: ${id}`);
+  applyFilters();
+
+  // ✅ depois de publicar, mostrar matches (menuzinho)
+  openMatchesModal(reqs[0]); // como fizeste unshift, o novo pedido está em [0]
+
   };
 }
 
@@ -350,8 +471,12 @@ function openDetails(requestId) {
     </div>
   `;
 
-  openModal("Detalhe do pedido", body, "Fechar");
+  openModal("Ofertas encontradas", body, "Fechar");
   $("#modalOk").onclick = closeModal;
+
+
+
+  
 }
 
 function initOrdersMarketplace() {

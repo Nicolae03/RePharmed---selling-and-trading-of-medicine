@@ -20,7 +20,7 @@
         </div>
       </div>
 
-      <button id="closeSidebarBtn" class="icon-btn" aria-label="Fechar menu">
+      <button id="closeSidebarBtn" class="icon-btn" aria-label="Fechar menu" type="button">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -37,8 +37,9 @@
       <a class="nav-item" href="profile.html" data-nav="profile">
         <span class="nav-item__icon">👤</span> Perfil
       </a>
-      <a class="nav-item" href="receipts.html"><span class="nav-item__icon">📦</span> Recibos</a>
-
+      <a class="nav-item" href="receipts.html" data-nav="receipts">
+        <span class="nav-item__icon">📦</span> Recibos
+      </a>
     </nav>
 
     <div class="sidebar__footer">
@@ -48,7 +49,7 @@
 
   <header class="topbar">
     <div class="topbar__left">
-      <button id="menuBtn" class="icon-btn" aria-label="Abrir menu">
+      <button id="menuBtn" class="icon-btn" aria-label="Abrir menu" type="button">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -69,8 +70,15 @@
           <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="2"/>
           <path d="M16.5 16.5 21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <input id="searchInput" class="search__input" type="search"
-               placeholder="Pesquisar por nome, substância ativa, laboratório…" autocomplete="off" />
+
+        <input
+          id="searchInput"
+          class="search__input"
+          type="search"
+          placeholder="Pesquisar por nome, substância ativa, laboratório…"
+          autocomplete="off"
+        />
+
         <button id="clearSearchBtn" class="search__clear" type="button" aria-label="Limpar pesquisa" hidden>
           Limpar
         </button>
@@ -78,16 +86,30 @@
     </div>
 
     <div class="topbar__right">
-      <button id="notifBtn" class="icon-btn" aria-label="Notificações">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9"/>
-          <path d="M18 16H6c1.2-1.2 2-2.7 2-4.5V9.5A4 4 0 0 1 12 5.5a4 4 0 0 1 4 4v2c0 1.8.8 3.3 2 4.5Z"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M10 5.5a2 2 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span id="notifDot" class="dot" title="Tens notificações"></span>
-      </button>
+      <!-- Notificações -->
+      <div class="notif">
+        <button id="notifBtn" class="icon-btn" aria-label="Notificações" type="button">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9"/>
+            <path d="M18 16H6c1.2-1.2 2-2.7 2-4.5V9.5A4 4 0 0 1 12 5.5a4 4 0 0 1 4 4v2c0 1.8.8 3.3 2 4.5Z"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M10 5.5a2 2 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <!-- a bolinha .dot é gerada pelo JS -->
+        </button>
 
+        <div id="notifMenu" class="notif-menu" hidden>
+          <div class="notif-menu__head">
+            <div class="notif-menu__title">Notificações</div>
+            <button id="notifMarkAll" class="btn btn--ghost" type="button">Marcar como lidas</button>
+          </div>
+
+          <div id="notifEmpty" class="notif-empty" hidden>Sem notificações.</div>
+          <div id="notifList" class="notif-list"></div>
+        </div>
+      </div>
+
+      <!-- Perfil (apenas 1x) -->
       <a class="icon-btn" aria-label="Perfil" href="profile.html">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -162,6 +184,27 @@
       <div class="empty__text">Ajusta os filtros ou pesquisa por outro termo.</div>
     </div>
   </main>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="backdrop" hidden>
+    <div class="modal">
+      <div class="modal__head">
+        <div style="font-weight:900">Finalizar compra</div>
+        <button id="checkoutClose" class="icon-btn" aria-label="Fechar" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="checkoutBody" class="modal__body"></div>
+
+      <div class="modal__foot">
+        <button id="checkoutCancel" class="btn" type="button">Cancelar</button>
+        <button id="checkoutPay" class="btn btn--primary" type="button">Confirmar (demo)</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast" hidden></div>
 

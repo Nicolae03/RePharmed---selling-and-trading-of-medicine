@@ -20,7 +20,7 @@
         </div>
       </div>
 
-      <button id="closeSidebarBtn" class="icon-btn" aria-label="Fechar menu">
+      <button id="closeSidebarBtn" class="icon-btn" aria-label="Fechar menu" type="button">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -32,7 +32,6 @@
       <a class="nav-item" href="orders.html" data-nav="orders"><span class="nav-item__icon">🧾</span> Pedidos</a>
       <a class="nav-item is-active" href="profile.html" data-nav="profile"><span class="nav-item__icon">👤</span> Perfil</a>
       <a class="nav-item" href="receipts.html"><span class="nav-item__icon">📦</span> Recibos</a>
-
     </nav>
 
     <div class="sidebar__footer">
@@ -42,7 +41,7 @@
 
   <header class="topbar">
     <div class="topbar__left">
-      <button id="menuBtn" class="icon-btn" aria-label="Abrir menu">
+      <button id="menuBtn" class="icon-btn" aria-label="Abrir menu" type="button">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -60,7 +59,7 @@
     <div class="topbar__center"></div>
 
     <div class="topbar__right">
-      <button id="notifBtn" class="icon-btn" aria-label="Notificações">
+      <button id="notifBtn" class="icon-btn" aria-label="Notificações" type="button">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
           <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22Z" fill="currentColor" opacity="0.9"/>
           <path d="M18 16H6c1.2-1.2 2-2.7 2-4.5V9.5A4 4 0 0 1 12 5.5a4 4 0 0 1 4 4v2c0 1.8.8 3.3 2 4.5Z"
@@ -105,6 +104,49 @@
         <div class="profile__card">
           <div class="profile__label">Preferências</div>
 
+          <div class="panel" style="margin-top:16px;">
+            <div class="panel__row">
+              <div class="panel__title">Estatísticas (demo)</div>
+              <div style="display:flex; gap:10px;">
+                <button id="regenStatsBtn" class="btn" type="button">Gerar novos dados</button>
+              </div>
+            </div>
+
+            <div class="kpi-grid" style="margin-top:12px;">
+              <div class="kpi"><div class="kpi__label">Profit (demo)</div><div id="kpiProfit" class="kpi__value">—</div></div>
+              <div class="kpi"><div class="kpi__label">Medicamentos salvos</div><div id="kpiSaved" class="kpi__value">—</div></div>
+              <div class="kpi"><div class="kpi__label">Unidades vendidas</div><div id="kpiUnits" class="kpi__value">—</div></div>
+              <div class="kpi"><div class="kpi__label">Total faturado</div><div id="kpiRevenue" class="kpi__value">—</div></div>
+            </div>
+
+            <div class="charts charts--profile" style="margin-top:16px;">
+              <!-- Full width -->
+              <div class="chart-card chart-card--full">
+                <div class="small">Gasto por mês</div>
+                <canvas id="chSpend"></canvas>
+              </div>
+
+              <!-- Row (2 columns) -->
+              <div class="charts__row">
+                <div class="chart-card">
+                  <div class="small">Compras por categoria</div>
+                  <canvas id="chCats"></canvas>
+                </div>
+
+                <div class="chart-card chart-card--square">
+                  <div class="small">Método de entrega</div>
+                  <canvas id="chDelivery"></canvas>
+                </div>
+              </div>
+
+              <!-- Full width -->
+              <div class="chart-card chart-card--full">
+                <div class="small">Profit (demo) — evolução</div>
+                <canvas id="chProfit"></canvas>
+              </div>
+            </div>
+          </div>
+
           <div class="toggle">
             <input id="prefNotif" type="checkbox" checked />
             <label for="prefNotif">Ativar notificações de novos anúncios</label>
@@ -123,8 +165,12 @@
 
   <div id="toast" class="toast" hidden></div>
 
+  
+
   <script src="data.js"></script>
   <script src="common.js"></script>
+  <!-- Chart.js antes do profile.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="profile.js"></script>
 </body>
 </html>
