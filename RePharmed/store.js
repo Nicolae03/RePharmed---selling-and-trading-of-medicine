@@ -116,9 +116,8 @@ function renderCards(items) {
           <div class="small">ID: ${it.id}</div>
         </div>
         <div class="card__cta">
-          <button class="btn" data-action="details" data-id="${it.id}">Ver</button>
-          <button class="btn btn--primary" data-action="order" data-id="${it.id}">Pedir</button>
-        </div>
+  <button class="btn btn--primary" data-action="order" data-id="${it.id}">Pedir</button>
+</div>
       </div>
     `;
     cards.appendChild(el);

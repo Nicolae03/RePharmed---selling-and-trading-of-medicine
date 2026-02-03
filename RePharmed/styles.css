@@ -99,14 +99,20 @@ img { max-width: 100%; display: block; }
 /* Brand */
 .brand{ display:flex; align-items:center; gap: 10px; }
 .logo{
-  width: 34px; height: 34px;
+  width: 44px;
+  height: 44px;
+
+  display: block;          /* img */
+  object-fit: cover;
+
+  background: #ffffff;     /* fundo branco */
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary), rgba(27,143,90,0.20));
-  display:flex; align-items:center; justify-content:center;
-  font-weight: 900;
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(27,143,90,0.18);
+  padding: 0px;
+
+  border: 1px solid var(--border);
+  box-shadow: none;
 }
+
 .brand__name{ font-weight: 900; line-height: 1.1; letter-spacing: 0.2px; }
 .brand__tag{ color: var(--muted2); font-size: 12px; margin-top: 2px; }
 

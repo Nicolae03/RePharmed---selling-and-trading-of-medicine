@@ -207,7 +207,6 @@ function renderRequestCards(items) {
           <div class="small">ID: ${r.id}</div>
         </div>
         <div class="card__cta">
-          <button class="btn" data-action="details" data-id="${r.id}">Ver</button>
           <button class="btn btn--primary" data-action="respond" data-id="${r.id}">Responder</button>
         </div>
       </div>
@@ -507,7 +506,6 @@ function initOrdersMarketplace() {
     const id = btn.dataset.id;
     const action = btn.dataset.action;
 
-    if (action === "details") openDetails(id);
     if (action === "respond") openRespond(id);
   });
 
